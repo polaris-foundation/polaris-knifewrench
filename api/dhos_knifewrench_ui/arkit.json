@@ -1,0 +1,30 @@
+{
+  "$schema": "https://arkit.pro/schema.json",
+  "excludePatterns": ["src/registerServiceWorker.ts", "test/**", "tests/**", "**/*.test.*", "**/*.spec.*"],
+  "components": [
+    {
+      "type": "Dependency",
+      "patterns": ["node_modules/*"]
+    },
+    {
+      "type": "Entry",
+      "patterns": ["src/**/*.ts", "src/**/*.tsx"]
+    }
+  ],
+  "output": [
+    {
+      "path": "arkit.svg",
+      "groups": [
+        {
+          "first": true,
+          "components": ["Entry"],
+          "patterns":  ["src/index.tsx"]
+        },
+        {
+          "components": ["Entry"],
+          "excludePatterns": ["src/index.tsx"]
+        }
+      ]
+    }
+  ]
+}

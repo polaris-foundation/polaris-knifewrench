@@ -1,0 +1,323 @@
+openapi: 3.0.3
+info:
+  description: The DHOS Knifewrench API is responsible for storing and retrieving
+    errored AMQP messages.
+  title: DHOS Knifewrench API
+  version: 1.0.0
+paths:
+  /running:
+    get:
+      summary: Verify service is running
+      description: Verifies that the service is running. Used for monitoring in kubernetes.
+      tags:
+      - monitoring
+      responses:
+        '200':
+          description: If we respond, we are running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  running:
+                    type: boolean
+                    example: true
+      operationId: flask_batteries_included.blueprint_monitoring.app_running
+  /version:
+    get:
+      summary: Get version information
+      description: Get the version number, circleci build number, and git hash.
+      tags:
+      - monitoring
+      responses:
+        '200':
+          description: Version numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  circle:
+                    type: string
+                    example: '1234'
+                  hash:
+                    type: string
+                    example: 366c204
+      operationId: flask_batteries_included.blueprint_monitoring.app_version
+  /dhos/v1/amqp_message:
+    post:
+      summary: Create AMQP message
+      description: Create a record of an errored AMQP message
+      tags:
+      - message
+      requestBody:
+        description: JSON body containing the AMQP message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRequest'
+              x-body-name: amqp_message_details
+      responses:
+        '201':
+          description: New AMQP message created
+          headers:
+            Location:
+              description: The location of the created AMQP message
+              schema:
+                type: string
+                example: http://localhost/dhos/v1/patient/2c4f1d24-2952-4d4e-b1d1-3637e33cc161
+        default:
+          description: Error, e.g. 400 Bad Request, 404 Not Found, 503 Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dhos_knifewrench_api.api.create_amqp_message
+      security:
+      - bearerAuth: []
+    get:
+      summary: Get all AMQP messages
+      description: Get a list of errored AMQP messages
+      tags:
+      - message
+      parameters:
+      - name: status
+        in: query
+        required: false
+        description: Status filter
+        schema:
+          type: string
+          enum:
+          - new
+          - archived
+          - republished
+          example: new
+      responses:
+        '200':
+          description: List of AMQP message
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error, e.g. 400 Bad Request, 404 Not Found, 503 Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dhos_knifewrench_api.api.get_amqp_message_list
+  /dhos/v1/amqp_message/{message_uuid}:
+    get:
+      summary: Get AMQP message
+      description: Get an errored AMQP message by UUID
+      tags:
+      - message
+      parameters:
+      - name: message_uuid
+        in: path
+        required: true
+        description: The AMQP message UUID
+        schema:
+          type: string
+          example: 18439f36-ffa9-42ae-90de-0beda299cd37
+      responses:
+        '200':
+          description: The AMQP message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error, e.g. 400 Bad Request, 404 Not Found, 503 Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dhos_knifewrench_api.api.get_amqp_message
+  /dhos/v1/amqp_message/{message_uuid}/republish:
+    post:
+      summary: Republish AMQP message
+      description: Republish an errored AMQP message by UUID using its routing key.
+        Responds with a 204 on successful republish.
+      tags:
+      - message
+      parameters:
+      - name: message_uuid
+        in: path
+        required: true
+        description: The AMQP message UUID
+        schema:
+          type: string
+          example: 18439f36-ffa9-42ae-90de-0beda299cd37
+      responses:
+        '204':
+          description: AMQP message successfully republished
+        default:
+          description: Error, e.g. 400 Bad Request, 404 Not Found, 503 Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dhos_knifewrench_api.api.republish_amqp_message
+      security:
+      - bearerAuth: []
+  /dhos/v1/amqp_message/republish:
+    post:
+      summary: Republish multiple AMQP messages
+      description: Republish multiple errored AMQP message using its routing key.
+        Responds with a 204 on successful republish of all messages.
+      tags:
+      - message
+      requestBody:
+        description: List of AMQP message UUIDs
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                example: 18439f36-ffa9-42ae-90de-0beda299cd37
+              x-body-name: message_uuids
+      responses:
+        '204':
+          description: AMQP messages successfully republished
+        default:
+          description: Error, e.g. 400 Bad Request, 404 Not Found, 503 Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      operationId: dhos_knifewrench_api.api.republish_multiple_amqp_message
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP response code
+          example: 404
+        message:
+          type: string
+          description: Message attached to response
+          example: Not Found
+      required:
+      - code
+      description: An error response in json format
+    MessageRequest:
+      type: object
+      properties:
+        routing_key:
+          type: string
+          nullable: true
+          example: gdm.12345
+          description: The AMQP routing key used to originally route this message
+        headers:
+          nullable: true
+          example:
+            x-first-death-queue: dhos-rules-adapter-task-queue
+            x-first-death-reason: rejected
+            x-first-death-exchange: dhos
+            x-death:
+            - time: '2019-01-14 12:52:47'
+              count: 1
+              queue: dhos-rules-adapter-task-queue
+              reason: rejected
+              exchange: dhos
+              routing-keys:
+              - send.1102421000000108
+          description: AMQP message headers
+        body:
+          nullable: true
+          example:
+            key: value
+          description: JSON body of the message, or null if the body could not be
+            loaded as JSON
+        raw_body:
+          type: string
+          example: some body once told me the world was gonna roll me
+          description: Raw message body bytes
+      required:
+      - raw_body
+      - routing_key
+      title: Message request
+    MessageResponse:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Universally unique identifier for object
+          example: 2c4f1d24-2952-4d4e-b1d1-3637e33cc161
+        created:
+          type: string
+          description: When the object was created
+          example: '2017-09-23T08:29:19.123+00:00'
+        created_by:
+          type: string
+          description: UUID of the user that created the object
+          example: d26570d8-a2c9-4906-9c6a-ea1a98b8b80f
+        modified:
+          type: string
+          description: When the object was modified
+          example: '2017-09-23T08:29:19.123+00:00'
+        modified_by:
+          type: string
+          description: UUID of the user that modified the object
+          example: 2a0e26e5-21b6-463a-92e8-06d7290067d0
+        message_body:
+          description: JSON body of the message, or null if the body could not be
+            loaded as JSON
+          example:
+            key: value
+        routing_key:
+          type: string
+          nullable: true
+          example: gdm.12345
+          description: The AMQP routing key used to originally route this message
+        status:
+          type: string
+          enum:
+          - new
+          - archived
+          - republished
+      required:
+      - routing_key
+      - status
+      - uuid
+      title: Message response
+  responses:
+    BadRequest:
+      description: Bad or malformed request was received
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Service or dependent resource not available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

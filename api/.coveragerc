@@ -1,0 +1,16 @@
+[paths]
+source =
+    dhos_knifewrench_api/*
+
+[report]
+
+omit =
+    **/__main__.py
+    dhos_knifewrench_api/app.py
+    dhos_knifewrench_api/autoapp.py
+    dhos_knifewrench_api/config.py
+
+fail_under = 95
+
+show_missing = true
+skip_covered = true

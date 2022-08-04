@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "dhos-knifewrench-api"
+version = "0.0.1"
+description = "DHOS Knife Wrench API"
+authors = ["Rob Grant <rob.grant@sensynehealth.com>"]
+keywords = ["OpenAPI", "Knife", "Wrench", "Knifewrench"]
+repository = "https://github.com/draysontechnologies/dhos-knifewrench"
+
+[[tool.poetry.source]]
+name = "sensynehealth"
+url = "https://pypi.fury.io/sensynehealth/"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask-batteries-included = {version = "3.*", extras = ["pgsql", "apispec"]}
+flask-cors = "3.*"
+kombu-batteries-included = "1.*"
+she-logging = "1.*"
+
+[tool.poetry.dev-dependencies]
+bandit = "*"
+black = "*"
+coloredlogs = "*"
+coverage = "*"
+isort = "*"
+mock = "*"
+mypy = "*"
+pytest = "*"
+pytest-dhos = {version = "*", extras=["fbi"]}
+pytest-flask = "*"
+pytest-mock = "*"
+sadisplay = "*"
+safety = "*"
+tox = "*"
+types-mock = "*"
+types-PyYAML ="*"
+types-waitress = "*"
+
+[tool.mypy]
+namespace_packages=true
+ignore_missing_imports=false
+disallow_untyped_defs=true
+
+[[tool.mypy.overrides]]
+module = [
+    "waitress",
+    "apispec.*",
+    "connexion",
+    "apispec_webframeworks.*",
+    "pytest_mock",
+    "flask",
+    "flask_cors",
+    "sadisplay",
+    "sqlalchemy.*",
+    "jose"
+]
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+known_third_party = ["alembic", "apispec", "apispec_webframeworks", "behave", "click", "clients", "connexion", "environs", "faker", "flask", "flask_batteries_included", "flask_sqlalchemy", "helpers", "jose", "marshmallow", "mock", "pytest", "pytest_dhos", "pytest_mock", "reporting", "reportportal_behave", "requests", "sadisplay", "she_logging", "sqlalchemy", "waitress", "yaml"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]

@@ -1,0 +1,91 @@
+version: "3.7"
+x-environment:
+  &COMMON_ENVIRONMENT
+  PROXY_URL: http://localhost
+  HS_ISSUER: http://localhost/
+  HS_KEY: secret
+  ENVIRONMENT: DEVELOPMENT
+  REDIS_HOST: localhost
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: doesntmatter
+  RABBITMQ_HOST: dhos-knifewrench-rabbitmq
+  RABBITMQ_USERNAME: guest
+  RABBITMQ_PASSWORD: guest
+  LOG_LEVEL: DEBUG
+  LOG_FORMAT: COLOUR
+
+services:
+  dhos-knifewrench-api:
+    container_name: "dhos-knifewrench-api"
+    build:
+      context: ../api/
+      args:
+        - GEMFURY_DOWNLOAD_KEY
+    environment:
+      <<: *COMMON_ENVIRONMENT
+      DATABASE_HOST: dhos-knifewrench-api-db
+      DATABASE_PORT: 5432
+      DATABASE_USER: dhos-knifewrench-api
+      DATABASE_PASSWORD: dhos-knifewrench-api
+      DATABASE_NAME: dhos-knifewrench-api
+    command: >
+      bash -c "wait-for-it dhos-knifewrench-api-db:5432 --strict
+      && wait-for-it dhos-knifewrench-rabbitmq:5672 -t 60 --strict
+      && flask db upgrade
+      && python -m dhos_knifewrench_api"
+    depends_on:
+      - "dhos-knifewrench-api-db"
+      - "dhos-knifewrench-rabbitmq"
+
+  dhos-knifewrench-adapter-worker:
+    container_name: "dhos-knifewrench-adapter-worker"
+    build:
+      context: ../adapter-worker/
+      args:
+        - GEMFURY_DOWNLOAD_KEY
+    environment:
+      <<: *COMMON_ENVIRONMENT
+      DHOS_KNIFEWRENCH_API_HOST: http://dhos-knifewrench-api:5000
+    command: >
+      bash -c "wait-for-it dhos-knifewrench-rabbitmq:5672 --strict
+      && python -m dhos_knifewrench_adapter_worker"
+    depends_on:
+      - "dhos-knifewrench-api"
+      - "dhos-knifewrench-rabbitmq"
+
+  dhos-knifewrench-api-db:
+    container_name: "dhos-knifewrench-api-db"
+    image: docker.io/postgres
+    environment:
+      POSTGRES_USER: dhos-knifewrench-api
+      POSTGRES_PASSWORD: dhos-knifewrench-api
+
+  dhos-knifewrench-rabbitmq:
+    container_name: "dhos-knifewrench-rabbitmq"
+    image: docker.io/rabbitmq:3-management-alpine
+    ports:
+      - "15672"
+
+  dhos-knifewrench-integration-tests:
+    container_name: "dhos-knifewrench-integration-tests"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      <<: *COMMON_ENVIRONMENT
+      SYSTEM_JWT_SCOPE: >-
+        read:error_message write:error_message
+      BEHAVE_ARGS: ${BEHAVE_ARGS:-}
+      REPORT_PORTAL_URL: ${REPORT_PORTAL_URL:-}
+      REPORT_PORTAL_TOKEN: ${REPORT_PORTAL_TOKEN:-}
+      REPORT_PORTAL_PROJECT: ${REPORT_PORTAL_PROJECT:-}
+      ENVIRONMENT: ${ENVIRONMENT:-}
+      RELEASE: ${RELEASE:-}
+    command: >
+      bash -c "wait-for-it dhos-knifewrench-rabbitmq:5672 -t 60 --strict
+      && wait-for-it dhos-knifewrench-api:5000 --strict
+      && behave --no-capture --no-logcapture ${BEHAVE_ARGS:-}"
+    depends_on:
+      - "dhos-knifewrench-api"
+      - "dhos-knifewrench-adapter-worker"
+      - "dhos-knifewrench-rabbitmq"

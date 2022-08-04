@@ -1,0 +1,11 @@
+src/registerServiceWorker.ts
+node_modules
+dist
+jest.config.js
+.huskyrc.js
+cosmos.config.js
+src/index.ejs
+**/*.svg
+src/**/*mock*/*
+src/resources/fonts/**/*
+src/resources/images/**/*

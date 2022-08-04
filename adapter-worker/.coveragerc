@@ -1,0 +1,13 @@
+[paths]
+source = dhos_knifewrench_adapter_worker/*
+
+[report]
+
+omit =
+  **/__init__.py
+  **/__main__.py
+
+fail_under = 100
+
+show_missing = true
+skip_covered = true

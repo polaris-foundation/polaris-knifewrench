@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eux
+
+for SERVICE_FOLDER in ${SERVICE_FOLDERS}; do
+    FULL_PROJECT_NAME=${CIRCLE_PROJECT_REPONAME}-${SERVICE_FOLDER}
+
+    docker build -t ${FULL_PROJECT_NAME} --build-arg GEMFURY_DOWNLOAD_KEY ${SERVICE_FOLDER}
+done
