@@ -1,6 +1,6 @@
 behave==1.*
-black==20.8b1
-environs==4.*
+black
+environs
 isort
 kombu==4.*
 mypy

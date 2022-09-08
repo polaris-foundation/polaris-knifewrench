@@ -1,14 +1,10 @@
 [tool.poetry]
-name = "she-dhos-knifewrench-adapter-worker"
+name = "dhos-knifewrench-adapter-worker"
 version = "0.0.1"
-description = "DHOS Knife Wrench Adapter Worker"
-authors = ["rob.grant@sensynehealth.com"]
+description = "Polaris Knife Wrench Adapter Worker"
+authors = ["Rob Grant <rob.grant@sensynehealth.com>"]
 keywords = ["RabbitMQ", "Pika", "Knife", "Wrench", "Knifewrench"]
-repository = "https://github.com/draysontechnologies/dhos-knifewrench"
-
-[[tool.poetry.source]]
-name = "sensynehealth"
-url = "https://pypi.fury.io/sensynehealth/"
+repository = "https://github.com/polaris-foundation/dhos-knifewrench"
 
 [tool.poetry.dependencies]
 python = "^3.9"
