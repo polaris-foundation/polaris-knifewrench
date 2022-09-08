@@ -3,8 +3,8 @@ name = "dhos-knifewrench-api"
 version = "0.0.1"
 description = "Polaris Knife Wrench API"
 authors = ["Rob Grant <rob.grant@sensynehealth.com>"]
-keywords = ["OpenAPI", "Knife", "Wrench", "Knifewrench"]
-repository = "https://github.com/polaris-foundation/dhos-knifewrench"
+keywords = ["Polaris", "OpenAPI", "Knife", "Wrench", "Knifewrench"]
+repository = "https://github.com/polaris-foundation/polaris-knifewrench"
 
 [tool.poetry.dependencies]
 python = "^3.9"
