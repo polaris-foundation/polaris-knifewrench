@@ -19,8 +19,6 @@ services:
     container_name: "dhos-knifewrench-api"
     build:
       context: ../api/
-      args:
-        - GEMFURY_DOWNLOAD_KEY
     environment:
       <<: *COMMON_ENVIRONMENT
       DATABASE_HOST: dhos-knifewrench-api-db
@@ -41,8 +39,6 @@ services:
     container_name: "dhos-knifewrench-adapter-worker"
     build:
       context: ../adapter-worker/
-      args:
-        - GEMFURY_DOWNLOAD_KEY
     environment:
       <<: *COMMON_ENVIRONMENT
       DHOS_KNIFEWRENCH_API_HOST: http://dhos-knifewrench-api:5000
