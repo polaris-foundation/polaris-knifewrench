@@ -3,8 +3,8 @@ name = "dhos-knifewrench-adapter-worker"
 version = "0.0.1"
 description = "Polaris Knife Wrench Adapter Worker"
 authors = ["Rob Grant <rob.grant@sensynehealth.com>"]
-keywords = ["RabbitMQ", "Pika", "Knife", "Wrench", "Knifewrench"]
-repository = "https://github.com/polaris-foundation/dhos-knifewrench"
+keywords = ["Polaris", "RabbitMQ", "Pika", "Knife", "Wrench", "Knifewrench"]
+repository = "https://github.com/polaris-foundation/polaris-knifewrench"
 
 [tool.poetry.dependencies]
 python = "^3.9"
