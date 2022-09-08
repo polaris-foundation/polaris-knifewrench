@@ -2,7 +2,7 @@
 name = "dhos-knifewrench-adapter-worker"
 version = "0.0.1"
 description = "Polaris Knife Wrench Adapter Worker"
-authors = ["rob.grant@sensynehealth.com"]
+authors = ["Rob Grant <rob.grant@sensynehealth.com>"]
 keywords = ["RabbitMQ", "Pika", "Knife", "Wrench", "Knifewrench"]
 repository = "https://github.com/polaris-foundation/dhos-knifewrench"
 
